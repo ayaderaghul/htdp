@@ -1,0 +1,69 @@
+#lang racket
+(require 2htdp/image 2htdp/universe)
+(require test-engine/racket-tests)
+
+ 
+(define WHEEL-RADIUS 5)
+(define WHEEL-DISTANCE (* WHEEL-RADIUS 5))
+
+(define TRUNK
+  (rectangle 50 20 "solid" "red"))
+
+(define WHEEL
+  (circle WHEEL-RADIUS "solid" "black"))
+(define SPACE
+  (rectangle 20 WHEEL-RADIUS "outline" "white"))
+(define BOTH-WHEELS
+  (beside WHEEL SPACE WHEEL))
+
+(define CAR
+  (overlay/offset TRUNK 2 10 BOTH-WHEELS))
+
+(define tree
+  (underlay/xy (circle 10 "solid" "green")
+               9 15
+               (rectangle 2 20 "solid" "brown")))
+
+(define WIDTH 400)
+(define HEIGHT 100)
+(define BACKGROUND
+  (empty-scene WIDTH HEIGHT))
+
+; a animationstate is a number
+; interpretation: the number of clock ticks
+; since the animation starts
+
+; worldstate -> image
+;  places the image of the car x pixels from
+; the left margin of the background image
+
+(define (render x)
+  (place-image CAR x (- HEIGHT WHEEL-DISTANCE)
+                   BACKGROUND))
+
+; worldstate -> worldstate
+; adds 3 to x to move the car right
+(define (tock x)
+  (+ 5 x))
+
+; worldstate number number string -> worldstate
+; places the car at x-mouse
+; if the given me is "button-down"
+(define (hyper x-posn x-mouse y-mouse me)
+  (cond
+    [(string=? "button-down" me) x-mouse]
+    [else x-posn]))
+; worldstate -> boolean
+(define (end? x)
+  (equal? x WIDTH))
+
+; worldstate->worldstate
+; launches the program from some initial state
+(define (main ws)
+  (big-bang ws
+            [on-tick tock]
+            [on-mouse hyper]
+            [to-draw render]
+            [stop-when end?]))
+
+
