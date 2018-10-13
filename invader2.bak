@@ -1,0 +1,15 @@
+#lang racket
+(require 2htdp/image 2htdp/universe test-engine/racket-tests)
+
+(define-struct sigs [ufo tank missile])
+; a sigs 2 is a structure
+; (make-sigs ufo tank missileornot]
+; interpretation represents the complete state of a
+; space invader game
+
+; a missileornot is one of:
+; - #f
+; - posn
+; interpretation #f means the missile in in tank
+; posn says that missile is at that location
+
