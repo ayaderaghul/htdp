@@ -1,0 +1,15 @@
+#lang racket
+
+(require test-engine/racket-tests)
+
+; List-of-numbers -> List-of-numbers
+; computes the weekly wages for all given weekly hours
+(define (wage* whrs)
+  (cond
+    [(empty? whrs) '()]
+    [else (cons (wage (first whrs)) (wage* (rest whrs)))]))
+ 
+; Number -> Number
+; computes the wage for h hours of work
+(define (wage h)
+  (* 12 h))

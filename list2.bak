@@ -1,0 +1,22 @@
+#lang racket
+(require test-engine/racket-tests)
+
+(check-within (add-to-pi 3) (+ 3 pi) 0.001)
+(define (add-to-pi n)
+  (cond
+    [(zero? n) pi]
+    [else (add1 (add-to-pi (sub1 n)))]))
+
+(define (my-add a b)
+  (cond
+    [(zero? a) b]
+    [else (add1 (my-add (sub1 a) b))]))
+(check-expect (my-add 2 3) 5)
+
+(define (my-mult a b)
+  (cond
+    [(= 1 a) b]
+    [else (+ b (my-mult (sub1 a) b))]))
+(check-expect (my-mult 3 5) 15)
+     
+(test)
