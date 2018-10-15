@@ -1,5 +1,6 @@
 #lang racket
 (require 2htdp/image 2htdp/universe test-engine/racket-tests)
+
 (define-struct editor [pre post] #:transparent)
 ; an editor is a structure:
 ; (make-editor lo1s lo1s)
@@ -40,14 +41,17 @@
 (define MT (empty-scene WIDTH HEIGHT))
 (define CURSOR (rectangle 1 HEIGHT "solid" "red"))
 
-
+(define (create-editor s1 s2)
+  (make-editor (reverse s1) s2))
+(define E0 (create-editor (cons "e" (cons "h" '())) (list "l" "l" "o")))
+(define E1 (create-editor (list "") (list "")))
 ; Editor -> Image
 ; renders an editor as an image of the two texts 
 ; separated by the cursor 
 
 (define (editor-render e)
   (place-image/align
-    (beside (editor-text (reverse (editor-pre e)))
+    (beside (editor-text (editor-pre e))
             CURSOR
             (editor-text (editor-post e)))
     1 1
@@ -86,14 +90,22 @@
 (define (editor-lft ed)
   (make-editor
    (drop-innermost (editor-pre ed))
-   (cons (take-innermost (editor-pre ed))
-         (editor-post ed))))
+   (if (and (string=? "" (first (editor-pre ed)))
+            (= 1 (length (editor-pre ed))))
+       (editor-post ed)
+       (cons (take-innermost (editor-pre ed))
+             (editor-post ed)))))
 (check-expect (editor-lft (make-editor (list "p" "r" "e")
                                        (list "p" "o" "s" "t")))
               (make-editor (list "p" "r")
                            (list "e" "p" "o" "s" "t")))
+
+
 (define (drop-innermost los)
-  (reverse (rest (reverse los))))
+  (if (and (string=? (first los) "")
+           (= 1 (length los)))
+      (cons "" '())
+      (reverse (rest (reverse los)))))
 (define (take-innermost los)
   (cond
     [(empty? (rest los)) (first los)]
@@ -103,11 +115,14 @@
 
 
 (define (editor-rgt ed)
-  (make-editor
-   (put-innermost
-    (editor-pre ed)
-    (first (editor-post ed)))
-   (rest (editor-post ed))))
+  (if (and (string=? "" (first (editor-post ed)))
+           (= 1 (length (editor-post ed))))
+      ed
+      (make-editor
+       (put-innermost
+        (editor-pre ed)
+        (first (editor-post ed)))
+       (rest (editor-post ed)))))
 (check-expect (editor-rgt (make-editor (list "p" "r" "e")
                                        (list "p" "o" "s" "t")))
               (make-editor (list "p" "r" "e" "p")
@@ -129,7 +144,7 @@
                 
 
 (define (editor-ins ed k)
-  (make-editor (cons k (editor-pre ed))
+  (make-editor (put-innermost (editor-pre ed) k)
                (editor-post ed)))
 
 (check-expect
@@ -141,12 +156,10 @@
     (make-editor (cons "d" '())
                  (cons "f" (cons "g" '())))
     "e")
-  (make-editor (cons "e" (cons "d" '()))
+  (make-editor (cons "d" (cons "e" '()))
                (cons "f" (cons "g" '()))))
 
 
-(define (create-editor s1 s2)
-  (make-editor s1 s2))
 
 
 ; main : String -> Editor
