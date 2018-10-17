@@ -1,5 +1,5 @@
 #lang racket
-(require test-engine/racket-tests 2htdp/batch-io lang/htdp-advanced)
+(require 2htdp/batch-io lang/htdp-advanced)
 
 (define LOCATION "~/usr/share/dict/words")
 (define AS-LIST (read-lines "words.txt"))
@@ -66,7 +66,7 @@
     [else (insert-lcount (first lolc) (sort-lcount (rest lolc)))]))
 (define (insert-lcount lc lolc)
   (cond
-    [(empty? lolc) (list lc)]
+    [(empty? lolc) '()]
     [else (if (>= (lcount-count lc) (lcount-count (first lolc)))
               (cons lc lolc)
               (cons (first lolc) (insert-lcount lc (rest lolc))))]))
@@ -103,106 +103,3 @@
 ;; sort list of dictionary based on its length
 ;; use insert as helper
 
-
-; List-of-strings -> Boolean
-(define (all-words-from-rat? w)
-  (and
-    (member? "rat" w) (member? "art" w) (member? "tar" w)))
- 
-; String -> List-of-strings
-; finds all words that the letters of some given word spell
- 
-(check-member-of (alternative-words "cat")
-                 (list "act" "cat")
-                 (list "cat" "act"))
- 
-(check-satisfied (alternative-words "rat")
-                 all-words-from-rat?)
- 
-(define (alternative-words s)
-  (in-dictionary
-    (words->strings (arrangements (explode s)))))
-
-; a word is one of:
-; - '() or
-; - (cons 1string word)
-; interpretation: a word is a list of 1strings (letters)
-
-; list of words is one of:
-; '()
-; (cons word low)
-
-
-
-
-; a word is a list of 1string
-; a list of words is a list of above
-; word ->list of words
-; finds all rearrangements of word
-(define (arrangements w)
-  (cond
-    [(empty? w) (list '())]
-    [else (insert-everywhere/in-all-words 
-           (first w)
-           (arrangements (rest w)))]))
-
-(define (insert-everywhere/in-all-words letter low)
-  (cond
-    [(empty? low) '()]
-    [else (append (insert-everywhere letter (first low))
-                (insert-everywhere/in-all-words letter (rest low)))]))
-(define (insert-everywhere letter w)
-  (insert-everywhere-helper letter w '()))
-
-
-(define (insert-everywhere-helper letter w1 w2)
-  (cond
-    [(empty? w1) (list (append '() (list letter) w2))]
-    [else (cons (append w1 (list letter) w2)
-                (insert-everywhere-helper 
-                 letter
-                 (first (move-left (list w1 w2)))
-                 (second (move-left (list w1 w2)))))]))
-
-(check-expect (insert-everywhere-helper "r" (list "d" "e") '())
-              (list (list "d" "e" "r") (list "d" "r" "e") (list "r" "d" "e")))
-
-(define (move-left low)
-  (list
-   (drop-last (first low))
-   (cons (last (first low)) (second low))))
-                
-(define (drop-last w)
-  (cond
-    [(empty? (rest w)) '()]
-    [else (cons (first w) (drop-last (rest w)))]))
-
-(check-expect (drop-last (list "d" "e" "r")) (list "d" "e"))
-(check-expect (move-left (list (list "d" "e") (list "r")))
-              (list (list "d") (list "e" "r")))
-
-(define (word->string w)
-  (apply string-append w))
-
-
-
-
-; List-of-words -> List-of-strings
-; turns all Words in low into Strings 
-
- (define (words->strings low)
-  (cond
-    [(empty? low) '()]
-    [else (cons (word->string (first low)) (words->strings (rest low)))]))
-
-; List-of-strings -> List-of-strings
-; picks out all those Strings that occur in the dictionary 
-(define (in-dictionary los)
-  (cond
-    [(empty? los) '()]
-    [else (if (member? (first los) DICT)
-              (cons (first los) (in-dictionary (rest los)))
-              (in-dictionary (rest los)))]))
-     
-
-(test)

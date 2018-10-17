@@ -1,0 +1,30 @@
+#lang racket
+(require 2htdp/image 2htdp/universe test-engine/racket-tests)
+
+(define WIDTH 10) ; # of blocks, horizontally 
+(define SIZE 10) ; blocks are squares
+(define SCENE-SIZE (* WIDTH SIZE))
+ 
+ 
+(define BLOCK ; red squares with black rims
+  (overlay
+    (square (- SIZE 1) "solid" "red")
+    (square SIZE "outline" "black")))
+
+(define-struct tetris [block landscape])
+(define-struct block [x y])
+ 
+; A Tetris is a structure:
+;   (make-tetris Block Landscape)
+; A Landscape is one of: 
+; – '() 
+; – (cons Block Landscape)
+; A Block is a structure:
+;   (make-block N N)
+ 
+; interpretations
+; (make-block x y) depicts a block whose left 
+; corner is (* x SIZE) pixels from the left and
+; (* y SIZE) pixels from the top;
+; (make-tetris b0 (list b1 b2 ...)) means b0 is the
+; dropping block, while b1, b2, and ... are resting

@@ -1,0 +1,178 @@
+#lang racket
+(require 2htdp/image 2htdp/universe test-engine/racket-tests)
+(define H 200)
+(define W 200)
+(define B (empty-scene H W))
+
+(define X (/ W 10))
+(define Y (/ H 10))
+
+(define S 5)
+
+(define WORM (circle S "solid" "red"))
+(define FOOD (circle S "solid" "green"))
+(define DIRS (list "north" "south" "east" "west"))
+(define-struct worm [los dir food] #:transparent)
+ (define (new-food)
+  (list (* 10 (random X)) 
+        (* 10 (random Y))))
+
+(define (create-worm l)
+  (make-worm
+   (create-los l)
+   (random-member DIRS)
+   (new-food)))
+
+(define (create-los l)
+  (cond
+    [(zero? (sub1 l)) (list (new-food))]
+    [else (add-1s (create-los (sub1 l)))]))
+                       
+(define (add-1s los)
+  (define new-segs (possible-new-segs (first los)))
+  (define new-seg
+    (cond
+      [(empty? (rest los)) (random-member new-segs)]
+      [else (random-member (remove (second los) new-segs))])) 
+  (cons new-seg los))
+
+(define (possible-new-segs seg)
+  (match-define (list x y) seg)
+  (list (list (+ 10 x) y)
+        (list (- x 10) y)
+        (list x (+ y 10))
+        (list x (- y 10))))
+
+(define (random-member lst)
+  (define l (length lst))
+  (define r (random l))
+  (list-ref lst r))
+
+         
+  
+  
+  
+  
+
+(define WP0 (make-worm (list (new-food))
+                       "east" 
+                       (new-food)))
+(define WP1 (make-worm (list (list 50 50) (list 50 60)) 
+                       "north"
+                       (list 20 20)))
+
+
+(define (place-segment 1s img)
+  (place-image WORM (first 1s) (second 1s) img))
+               
+(define (place-worm los)
+  (cond
+    [(empty? (rest los)) (place-segment (first los) B)]
+    [else (place-segment (first los)
+                         (place-worm (rest los)))]))
+
+
+(define (render wp)
+  (define head (first (worm-los wp)))
+  (define food (worm-food wp))
+  (if
+   (over? wp)
+   (place-image (text 
+                 (if (hit-wall? head)
+                     "worm hits border"
+                     "worm hits itself")
+                 11 "black")
+                (/ W 2) (- H 50)
+                (place-worm (cons food (worm-los wp))))
+   (place-worm (cons food (worm-los wp)))))
+
+(define (drop-last los)
+  (cond
+    [(empty? (rest los)) '()]
+    [else (cons (first los) (drop-last (rest los)))]))
+(check-expect (drop-last (list 1 2 3)) (list 1 2))
+
+
+
+(define (move-and/or-eat wp)
+  (define los (worm-los wp))
+  (define head (first los))
+  
+  (match-define (list x y) head)
+  (define dir (worm-dir wp))
+  (define food (worm-food wp))
+  (define new-head
+    (cond
+      [(string=? dir "east") (list (+ 10 x) y)]
+      [(string=? dir "west") (list (- x 10) y)]
+      [(string=? dir "north") (list x (- y 10))]
+      [(string=? dir "south") (list x (+ 10 y))]))
+  (define new-body (drop-last los))
+  (make-worm
+   (cons new-head (if (equal? head food)
+                      los new-body))
+   dir (if (equal? head food) (new-food) food)))
+  
+(define WP3 (make-worm
+             (list (list 50 50) (list 50 60))
+             "north"
+             (list 50 50)))
+    
+
+
+(define (change wp ke)
+  (define los (worm-los wp))
+  (define dir (worm-dir wp))
+  (define food (worm-food wp))
+  (make-worm los
+             (cond
+               [(string=? ke "up") "north"]
+               [(string=? ke "down") "south"]
+               [(string=? ke "left") "west"]
+               [(string=? ke "right") "east"]
+               [else dir])
+             food))
+ 
+(define (over? wp)
+  (define head (first (worm-los wp)))
+  (define body (rest (worm-los wp)))
+  (or (hit-wall? head)
+      (hit-itself? head body)))
+(define (hit-wall? h)
+  (define x (first h))
+  (define y (second h))
+  (or (not (< 0 x W))
+      (not (< 0 y H))))
+
+(define (hit-itself? h b)
+  (member? h b))
+    
+(define WP2 (make-worm (list (list 50 50)
+                             (list 50 60)
+                             (list 50 70) (list 50 80) (list 50 90)) 
+                       "north"
+                       (list 20 20)))
+(check-expect (hit-itself? (first (worm-los WP2)) (rest (worm-los WP2))) #f)
+(check-expect (member? (list 50 50) (list 
+                                     (list 60 50) (list 60 60) (list 50 60)
+                                     (list 50 50)))
+              #t)
+
+(define (member? lop llp)
+  (cond
+    [(empty? llp) #f]
+    [else (if (and (= (first lop) (first (first llp)))
+                   (= (second lop) (second (first llp))))
+              #t
+              (member? lop (rest llp)))]))
+         
+(define (main l)
+  (define wp0 (create-worm 1))
+  (big-bang wp0
+            [on-tick move-and/or-eat 0.3]
+            [state #t]
+            [on-key change]
+            [to-draw render]
+            [stop-when over?]))
+
+(test)

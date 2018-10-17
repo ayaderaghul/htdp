@@ -1,0 +1,6 @@
+#lang racket
+(require 2htdp/image 2htdp/universe test-engine/racket-tests)
+(define H 300)
+(define W 300)
+(define B (empty-scene H W))
+

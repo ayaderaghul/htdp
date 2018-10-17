@@ -1,0 +1,40 @@
+#lang racket
+
+(require 2htdp/image 2htdp/universe test-engine/racket-tests)
+
+(define-struct game [plane water fires] #:transparent)
+(define-struct plane [loc vel] #:transparent)
+
+(define BLOCK-SIZE 10)
+(define BLOCKS 20)
+(define SCENE-SIZE (* BLOCK-SIZE BLOCKS))
+(define BACKGROUND (empty-scene SCENE-SIZE))
+
+(define PLANE-HEIGHT 10)
+(define PLANE (rectangle 20 TANK-HEGHT "solid" "green"))
+
+(define WATER (square BLOCK-SIZE "solid" "blue"))
+(define FIRE (square BLOCK-SIZE "solid" "red"))
+
+(define WATER-V 2)
+(define FIRE-V 1)
+
+(define g1 (make-game (list 20 10) '() (list '())))
+
+(define (render-fire lof)
+  (cond
+    [(empty? lof) BACKGROUND]
+    [else (place-image FIRE (first (first lof))
+                       (second (first lof))
+                       (render-fire (rest lof)))]))
+
+(define (render-water low
+
+(define (render g)
+  (
+
+(define (main g0)
+  (big-bang g0
+            [on-tick tock 1 20]
+            [on-key change]
+            [to-draw render]))
