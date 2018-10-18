@@ -175,7 +175,7 @@
 (check-expect (fold1 + 0 '(1 2 3 4)) 10)
 (check-expect (fold1 * 1 '(2 3 4)) 24)
 
-(define-struct posn [x y])
+(define-struct posn [x y] #:transparent)
 
 ; [list of posn] -> image
 (define (image* l)
@@ -441,13 +441,212 @@
                      (create-row 1-at (sub1 n)))])))
     (identity (sub1 n) (sub1 n))))
 
-
-
-
 (check-expect (identityM 1) (list (list 1)))
 (check-expect (identityM 3) (list (list 1 0 0)
                                   (list 0 1 0)
                                   (list 0 0 1)))
+
+
+; [list of posn] -> [lits of posn]
+; add 3 to each x-coor on the given list
+(check-expect (add-3-to-all (list (make-posn 3 1) (make-posn 0 0)))
+              (list (make-posn 6 1) (make-posn 3 0)))
+
+(define (add-3-to-all lop)
+  (cond
+    [(empty? lop) '()]
+    [else (cons (make-posn (+ 3 (posn-x (first lop))) (posn-y (first lop)))
+                (add-3-to-all (rest lop)))]))
+
+(define (add-3-to-all2 lop)
+  (local ((define (add3 p)
+            (make-posn (+ 3 (posn-x p)) (posn-y p)))
+          )
+    (map add3 lop)))
+(check-expect (add-3-to-all2 (list (make-posn 3 1) (make-posn 0 0)))
+              (add-3-to-all (list (make-posn 3 1) (make-posn 0 0))))
+
+
+; [list of posn] -> [list of posn]
+; eliminates posn whose y coor is > 100
+(check-expect (keep-good (list (make-posn 0 110) (make-posn 0 60)))
+              (list (make-posn 0 60)))
+
+(define (keep-good lop) 
+  (local ((define (good? p) (<= (posn-y p) 100)))
+    (filter good? lop)))
+
+
+; posn posn number -> boolean
+; is the distance bw p and q less than d
+(define (close-to p q d)
+  (define dis
+    (sqrt (+ 
+           (sqr (- (posn-x p) (posn-x q)))
+           (sqr (- (posn-y p) (posn-y q))))))
+  (<= dis d))
+   
+; list-of-posn posn -> boolean
+; is any posn on lop close to pt
+
+(check-expect
+ (close? (list (make-posn 47 54) (make-posn 0 60)) (make-posn 50 50))
+ #t)
+(define (close? lop pt)
+  (local (
+          (define (is-one-close? p)
+            (close-to p pt 5)))
+    (ormap is-one-close? lop)))
+
+; [list of posn] -> image
+; add the posn on lop to the empty scene
+(define DOT (circle 5 "solid" "red"))
+(define MT-SCENE (empty-scene 100 100))
+(check-expect (dots (list (make-posn 12 31)))
+              (place-image DOT 12 31 MT-SCENE))
+(define (dots lop)
+  (local
+    ((define (place-dot p im)
+       (place-image DOT (posn-x p) (posn-y p) im)))
+    (foldr place-dot MT-SCENE lop)))
+
+
+;;;;
+
+(define (convert-euro lod)
+  (local 
+    ((define (dollar->euro d)
+       (* 0.9 d)))
+    (map dollar->euro lod)))
+
+(check-within (convert-euro (list 10 100)) (list 9 90) 0.001)
+(define (convertFC lof)
+  (local
+    ((define (F->C f)
+       (/ (- f 32) 5/9)))
+    (map convertFC lof)))
+
+(define (translate lop)
+  (local
+    ((define (posn->pair p)
+       (list (posn-x p) (posn-y p))))
+    (map posn->pair lop)))
+
+(check-expect (translate (list (make-posn 20 20))) (list (list 20 20)))
+
+;;;;
+(define-struct item [name desc cost price] #:transparent)
+(define (sort-inv loi)
+  (cond
+    [(empty? loi) '()]
+    [else (insert-inv (first loi) 
+                      (sort-inv (rest loi)))]))
+
+(define (bigger-margin? i1 i2)
+  (>= (- (item-price i1) (item-cost i1))
+      (- (item-price i2) (item-cost i2))))
+(define (insert-inv i loi)
+  (cond
+    [(empty? loi) (list i)]
+    [else
+     (if (bigger-margin? i (first loi)) 
+         (cons i (insert-inv (first loi) (rest loi)))
+         (cons (first loi) (insert-inv i (rest loi))))]))
+
+
+
+(define inv0 (list (make-item "r2d2" "toy" 10 15)
+                   (make-item "leia" "princess" 3 8)
+                   (make-item "ship" "space" 11 20)))
+(check-expect (sort-inv inv0)
+              (list (make-item "ship" "space" 11 20)
+                    (make-item "r2d2" "toy" 10 15)
+                    (make-item "leia" "princess" 3 8)))
+     
+
+(define (eliminate-expensive ua inv)
+  (local
+    ((define (cheaper-than-ua? i)
+       (< (item-price i) ua)))
+    (filter cheaper-than-ua? inv)))
+(check-expect (eliminate-expensive 10 inv0)
+              (list (make-item "leia" "princess" 3 8)))
+
+(define (recall ty inv)
+  (local
+    ((define (not-ty? i)
+       (not (equal? (item-name i) ty))))
+    (filter not-ty? inv)))
+(check-expect (recall "r2d2" inv0)
+              (list (make-item "leia" "princess" 3 8)
+                    (make-item "ship" "space" 11 20)
+                    ))
+
+(define (selection lon1 lon2)
+  (local
+    ((define (in-lon1? s)
+       (local
+         ((define (s? x) (string=? x s)))
+         (ormap s? lon1))))
+    (filter in-lon1? lon2)))
+(check-expect (selection (list "a" "b" "c") (list "b" "d" "c"))
+              (list "b" "c"))
+              
+
+(define (build-lon n)
+  (build-list n values))
+
+(check-expect (build-lon 3) (list 0 1 2))
+
+(define (build-lon2 n)
+  (build-list n add1))
+(check-expect (build-lon2 3) (list 1 2 3))
+(define (build-lon3 n)
+  (local
+    ((define (reciprocal x)
+       (if (zero? x) (error "divide by zero")
+           (/ 1 x)))
+     (define l (build-list n add1)))
+    (map reciprocal l)))
+
+(check-expect (build-lon3 3) (list 1 1/2 1/3))
+
+(define (build-lon4 n)
+  (local
+    ((define (mult2 x) (* 2 x))
+     (define l (build-list n values)))
+    (map mult2 l)))
+
+(check-expect (build-lon4 3) (list 0 2 4))
+
+(define (build-identity-matrix n)
+  (local
+    ((define (create-row 1-at size)
+       (cond
+         [(zero? size) (if (zero? 1-at) (list 1) (list 0))]
+         [else (cons (if (= 1-at size) 1 0) (create-row 1-at (sub1 size)))]))
+     (define (create-row-of-n 1-at) (create-row 1-at (sub1 n)))
+     (define l (reverse (build-list n values))))
+    (map create-row-of-n l)))
+(check-expect (build-identity-matrix 3)
+              (list (list 1 0 0) (list 0 1 0) (list 0 0 1)))
+(check-expect (build-identity-matrix 1)
+              (list (list 1)))
+
+
+(define (tabulate2 f n)
+  (local
+    ((define l (cons 0 (build-list n add1))))
+    (map f l)))
+(check-expect (tabulate2 values 3) (list 0 1 2 3))
+
+     
+     
+     
+
+
+
+
 
 
 
