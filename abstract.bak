@@ -1,0 +1,34 @@
+#lang racket
+
+(require test-engine/racket-tests)
+
+; lon -> lon
+(define (addx x lon)
+  (cond
+    [(empty? lon) '()]
+    [else (cons (+ x (first lon))
+                (addx x (rest lon)))]))
+
+(define (add1* lon) (addx 1 lon))
+(define (plus5 lon) (addx 5 lon))
+
+(check-expect (add1* '(1 2 34)) '(2 3 35))
+(check-expect (plus5 '(2 4 5)) '(7 9 10))
+
+(define (extract R l t)
+  (cond
+    [(empty? l) '()]
+    [else (cond
+            [(R (first l) t)
+             (cons (first l)
+                   (extract R (rest l) t))]
+            [else
+             (extract R (rest l) t)])]))
+
+(check-expect (extract < '() 5) (small '() 5))
+(check-expect (extract < '(3) 5) (small '(3) 5))
+(check-expect (extract < '(1 6 4) 5)
+              (small '(1 6 4) 5))
+
+
+(test)
