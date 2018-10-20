@@ -1,0 +1,54 @@
+#lang racket
+(require test-engine/racket-tests)
+(define-struct posn [x y])
+                                 
+(define (convert-euro lod)
+  (map (lambda (x) (* x 0.9)) lod))
+
+(define (convertFC lof)
+  (map (lambda (x) (* 5/9 (- x 32))) lof))
+
+(define (translate lop)
+  (map (lambda (p) (list (posn-x p) (posn-y p))) lop))
+
+(define-struct ir [name desc cost price] #:transparent)
+
+(define (sort loi)
+  (cond
+    [(empty? loi) '()]
+    [else (insert (first loi) (sort (rest loi)))]))
+
+
+(define (insert i loi)
+  (cond
+    [(empty? loi) (list i)]
+    [else (if (margin< i (first loi))
+              (cons (first loi) (insert i (rest loi)))
+              (cons i (insert (first loi) (rest loi))))]))
+              
+(define (margin< ir1 ir2)
+  (define (margin i)
+    (- (ir-price i) (ir-cost i)))
+  (< (margin ir1) (margin ir2)))
+
+(define (eliminate-expensive ua loi)
+  (filter (lambda (x) (< (ir-price x) ua)) loi))
+
+(define (recall ty loi)
+  (filter (lambda (x) (not (string=? ty (ir-name x)))) loi))
+(define (member? x lst)
+  (ormap (lambda (y) (string=? x y)) lst))
+(define (selection lon1 lon2)
+  (filter (lambda (x) (member? x lon1)) lon2))
+
+(check-expect (selection (list "a" "b" "c") (list "b" "d"))
+              (list "b"))
+
+
+
+
+
+
+
+(test)
+                      
