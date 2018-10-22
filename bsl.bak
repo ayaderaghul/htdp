@@ -1,0 +1,18 @@
+#lang racket
+
+; number number -> number
+;
+
+(define-struct add [left right])
+(define-struct mul [left right])
+
+(define (eval-1exp exp)
+  (cond
+    [(add? exp) (+ (add-left exp) (add-right exp))]
+    [(mul? exp) (* (mul-left exp) (mul-right exp))]))
+           
+
+(define (eval-expression exp)
+  
+  
+  
