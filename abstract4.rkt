@@ -15,8 +15,8 @@
 ; [list of x] [list of y] -> [list of [list x y]]
 ; generates all pairs of items from l1 and l2
 
-(check-satisfied (cross '(a b c) '(1 2))
-                 (lambda (c) (= (length c) 6)))
+;(check-satisfied (cross '(a b c) '(1 2))
+;                 (lambda (c) (= (length c) 6)))
 
 (define (cross l1 l2)
   (for*/list ([x1 l1] [x2 l2])
@@ -636,14 +636,7 @@
             (cons (dir2-name dt)
                   (list (find1 n d)))) (dir2-dirs dt))]
      [else #f]
-    ))
-(define (find* lst)
-  (filter
-   (lambda (l)
-     (not (false? (last l))))
-   lst))
-               
-
+    ))  
 
 
    
@@ -655,8 +648,12 @@
 
 ; string -> dir
 ; creates a representation of the a-path directory
+;(define W (create-dir
+;  "C:\\Users\\linhchi.nguyen\\Documents\\htdp\\"))
+
 (define W (create-dir
-  "C:\\Users\\linhchi.nguyen\\Documents\\htdp\\"))
+           "R:\\htdp\\"))
+
 
 (define (how-many4 bt)
   (+
@@ -670,8 +667,8 @@
          (dir-files bt)
          (dir-dirs bt)))
 
-(check-expect (find? "abstract.rkt" W) #t)
-(check-expect (find? "index" W) #t)
+(check-expect (find? 'abstract.rkt W) #t)
+(check-expect (find? 'index W) #t)
 
 (define (ls bt)
   (append

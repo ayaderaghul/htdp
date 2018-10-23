@@ -172,10 +172,66 @@
 ; name exp
 ; fex sym sym fex -> value (number)
 (define (eval-definition1 ex f x b)
-  (local
-    ((define value (eval-definition1 arg f x b))
-     (define plugd (subst b x arg-value)))
-    (eval-definition1 plugd f x b)))
+  (eval-exp (subst b x (eval-exp ex)))) 
+  
+(check-expect (eval-definition1 2 'f 'x (make-add 2 'x))
+              4)
+
+;  (local
+;    ((define value (eval-definition1 arg f x b))
+;     (define plugd (subst b x arg-value)))
+;   (eval-definition1 plugd f x b)))
+
+; fex
+; - number
+; - symbol
+; - (make-add vex vex]
+; - (make-mul vex vex]
+; - (list symbol vex)
+
+
+; bsl-fun-def
+; symbol symbol body(vex]
+; 'f 'x (make-add vex vex)
+
+; 'g 'y ('f (make-mul 2 y]
+; 'h 'v (make-add ('f 'v] ['g 'v]]
+
+; bsl-fun-def* symbol -> bsl-fun-def
+; retrieves the definition of f in da
+; signals an error if there is none
+(check-expect (lookup-def da-fgh 'g) '(g y (f (make-mul 2 'y))))
+(define (lookup-def da f)
+  (assq f da))
+(define da-fgh
+  (list
+   (list 'f 'x (make-add 3 'x))
+   (list 'g 'y '(f (make-mul 2 'y)))
+   (list 'h 'v (make-add '(f v) '(g v)))))
+
+(define (eval-function* ex da)
+  (cond
+    [(number? ex) ex]
+    [(list? ex)  
+     (local
+       ((define res (lookup-def da-fgh (first ex)))
+        (define var (second res))
+        (define body (last res)))
+       (eval-definition1 (second ex) (first ex) var body))]
+    [(add? ex) (+ (eval-function* (add-left ex) da)
+                  (eval-function* (add-right ex) da))]
+    [(mul? ex) (* (eval-function* (add-left ex) da)
+                  (eval-function* (add-right ex) da))]))
+          
+    
+(define e (make-add '(f 1) '(g 3)))
+(check-expect (eval-function* 
+               (make-add '(f 1) '(g 3)) da-fgh)
+              (eval-exp (make-add (make-add 3 1) 
+                                  (make-add 3 (make-mul 2 3)))))
+      
+
+
 
 
 
