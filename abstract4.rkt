@@ -620,27 +620,73 @@
           '()))
    (list (make-file2 "read" 10 ""))))
 
+(define bt5 (make-dir2 "ts" 
+                         (list (make-dir2 "d1" '() (list
+                                                    (make-file2 "text" 10 "")))
+                               (make-dir2 "d2" '() (list
+                                                    (make-file2 "text" 10 "")))
+                               (make-dir2 "d4" '() (list
+                                                    (make-file2 "text" 10 ""))))
+                         (list (make-file2 "text" 10 ""))))
+
+
 (define (how-many3 bt)
   (+
    (length (dir2-files bt))
    (apply + (map how-many3 (dir2-dirs bt)))))
 
 (check-expect (how-many3 bt3) 7)
-
 (define (find1 n dt)
   (cond
     [(member? n (map file2-name (dir2-files dt)))
      (list (dir2-name dt) n)]
     [(not (empty? (dir2-dirs dt)))
-     (map (lambda (d)
-            (cons (dir2-name dt)
-                  (list (find1 n d)))) (dir2-dirs dt))]
-     [else #f]
-    ))  
+     (filter not-false-end? 
+             (map (lambda (d)
+                    (cons (dir2-name dt)
+                          (find1 n d))) (dir2-dirs dt)))]
+    [else (list #f)]
+    ))
+
+(define (find2 n lod dname)
+  (cond
+    [(empty? lod) (list #f)]
+    [else 
+     (empty->false
+      (filter not-false-end? 
+              (map (lambda (d) (cons dname (find-h n d))) lod)))]))
+
+(define (empty->false lst)
+  (if (empty? lst) (list #f) lst))
+
+(define (find-h n d)
+  (cond
+    [(member? n (map file2-name (dir2-files d))) (list (dir2-name d) n)]
+    [else (find2 n (dir2-dirs d) (dir2-name d))]))
+
+(define (find-h2 n d)
+  (local
+    ((define res (find2 n (dir2-dirs d) (dir2-name d))))
+    (if (member? n (map file2-name (dir2-files d))) 
+        (cons (list (dir2-name d) n) res)
+        res)))
+
+(define (not-false-end? lst)
+  (not (false? (last lst))))
 
 
-   
+(define (ls-R lod dname)
+  (cond
+    [(empty? lod) '()]
+    [else 
+     (local ((define res (map ls-h lod)))
+       (map (lambda (n) (list dname n)) res))]))
 
+(define (ls-h dtree)
+  (cons
+   (map (lambda (n) (list (dir2-name dtree) n)) 
+        (map file2-name (dir2-files dtree)))
+   (ls-R (dir2-dirs dtree) (dir2-name dtree))))
 
 
 
@@ -697,5 +743,12 @@
   (cond
     [(member? n (map file-name (dir-files dt))) (dir-name dt)]
     [else (map (lambda (x) (find n x)) (dir-dirs dt))]))
+
+
+
+
+
+
+
 
 (test)
