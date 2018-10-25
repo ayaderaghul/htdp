@@ -680,13 +680,22 @@
     [(empty? lod) '()]
     [else 
      (local ((define res (map ls-h lod)))
-       (map (lambda (n) (list dname n)) res))]))
+       (map (lambda (n) (add-names dname n)) res))]))
 
 (define (ls-h dtree)
-  (cons
+  (append
    (map (lambda (n) (list (dir2-name dtree) n)) 
         (map file2-name (dir2-files dtree)))
    (ls-R (dir2-dirs dtree) (dir2-name dtree))))
+
+(define (add-names dname s-or-los)
+  (cond
+    [(string? s-or-los) (list dname s-or-los)]
+    [(list? s-or-los)
+     (map (lambda (n) (list dname n)) s-or-los)]))
+   
+  
+                   
 
 
 
@@ -694,11 +703,11 @@
 
 ; string -> dir
 ; creates a representation of the a-path directory
-;(define W (create-dir
-;  "C:\\Users\\linhchi.nguyen\\Documents\\htdp\\"))
-
 (define W (create-dir
-           "R:\\htdp\\"))
+  "C:\\Users\\linhchi.nguyen\\Documents\\htdp\\"))
+
+;(define W (create-dir
+;           "R:\\htdp\\"))
 
 
 (define (how-many4 bt)
@@ -713,8 +722,8 @@
          (dir-files bt)
          (dir-dirs bt)))
 
-(check-expect (find? 'abstract.rkt W) #t)
-(check-expect (find? 'index W) #t)
+(check-expect (find? "abstract.rkt" W) #t)
+(check-expect (find? "index" W) #t)
 
 (define (ls bt)
   (append
