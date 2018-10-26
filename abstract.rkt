@@ -1,7 +1,7 @@
 #lang racket
 
 (require 2htdp/image 2htdp/universe test-engine/racket-tests)
-
+;; 236-238 III abstraction
 ; lon -> lon
 (define (addx x lon)
   (cond
@@ -24,7 +24,7 @@
                    (extract R (rest l) t))]
             [else
              (extract R (rest l) t)])]))
-
+;; 238
 (define (extreme R l)
   (cond
     [(empty? (rest l)) (first l)]
@@ -59,7 +59,8 @@
     [else (if (equal? s (first los))
               (rest los)
               (occurs s (rest los)))]))
-  
+;;; 245
+
 (define (function=?at f1 f2)
   (and
    (equal? (f1 1.2) (f2 1.2))
@@ -140,7 +141,7 @@
                 (tab-sqrt (sub1 n)))]))
 
 ; [number -> number] number -> list of numbers
-
+;; 250
 (define (tabulate f n)
   (cond
     [(zero? n) (list (f 0))]
@@ -166,6 +167,7 @@
    [else (* (first l) 
             (product (rest l)))]))
 
+;; 251
 ; f[numbers -> number] init list-of-number > number
 (define (fold1 f init lon)
   (cond
@@ -197,12 +199,14 @@
 (define emt (empty-scene 100 100))
 (define dot (circle 3 "solid" "red"))
 
-
+;; 254
 
 ; sort-n: lon [number number -> boolean] -> lon
 ; sort-s: los [string string -> boolean] -> los
 ; sort: [x] list-of-x [x x -> boolean] -> list-of-x
 ; [x = [ir -> x]] lox [x x -> boolean] -> lox
+
+;;; 255
 
 ; map-n: lon [number -> number] -> lon
 ; map-s: los [string -> string] -> los
@@ -225,7 +229,10 @@
 
 (check-expect (fold1 place-dot emt (list (make-posn 10 10) (make-posn 20 20)))
               (render (list (make-posn 10 10) (make-posn 20 20))))
-                     
+             
+;; 257
+
+
 ; [x] n [n -> x] -> [list of x]
 ; construct a list by applying f to 0 1 ... n-1
 ; (build-list n f] == (list (f 0] ...(f (- n 1]]]
@@ -426,6 +433,9 @@
          [else in]))]))
 (check-expect (extract2 inv) (extract1 inv))
 
+
+;;; 262
+
 ; positive -> list of list of number
 (define (identityM n)
   (local
@@ -513,6 +523,8 @@
 
 ;;;;
 
+;;; 267
+
 (define (convert-euro lod)
   (local 
     ((define (dollar->euro d)
@@ -534,7 +546,7 @@
 
 (check-expect (translate (list (make-posn 20 20))) (list (list 20 20)))
 
-;;;;
+;;;; 268
 (define-struct item [name desc cost price] #:transparent)
 (define (sort-inv loi)
   (cond
@@ -563,7 +575,7 @@
                     (make-item "r2d2" "toy" 10 15)
                     (make-item "leia" "princess" 3 8)))
      
-
+;;; 269 
 (define (eliminate-expensive ua inv)
   (local
     ((define (cheaper-than-ua? i)
@@ -592,7 +604,7 @@
 (check-expect (selection (list "a" "b" "c") (list "b" "d" "c"))
               (list "b" "c"))
               
-
+;;; 270 
 (define (build-lon n)
   (build-list n values))
 

@@ -2,7 +2,7 @@
 (require 2htdp/batch-io
   2htdp/image 2htdp/universe test-engine/racket-tests)
 
-
+;; ex 272 - chapter 3 abstraction
 (define (append-from-fold l1 l2)
   (local
     ((define (add-last x l)
@@ -69,12 +69,20 @@
 (check-expect (compose (list (circle 10 "solid" "red") (circle 10 "solid" "blue")))
               (beside (circle 10 "solid" "blue") (circle 10 "solid" "red")))
 
+
+
+
+
+;; 273 III abstraction
+
 (define (map-from-fold f ls)
   (local ((define (collect nxt init) (cons (f nxt) init)))
     (foldr collect '() ls)))
 
 (check-expect(map-from-fold add1 (list 1 2 3)) (list 2 3 4))
 
+
+;; 274
 (define (prefixes ls)
   (local
     ((define (f nxt init)
@@ -93,6 +101,7 @@
 (check-expect (suffixes (list 1 2 3))
               (list (list 1 2 3) (list 2 3) (list 3)))
 
+;; 275
 (define DICT (read-lines "words.txt"))
 (define DICT2 (map string->list DICT))
 (define ALPHABET (string->list "abcdefghijklmnopqrstuvwxyz"))
@@ -158,7 +167,7 @@
 (define (my-find l th)
   (filter (lambda (ir) (<= (ir-price ir) th)) l))
 
-
+;; 281
 (lambda (n) (< n 10))
 (lambda (a b) (number->string (* a b)))
 (lambda (n) (if (even? n) 0 1))

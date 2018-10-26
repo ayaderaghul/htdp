@@ -2,7 +2,7 @@
 (require 2htdp/image 2htdp/universe)
 (require test-engine/racket-tests)
 
-;; 40 - 44 I fixed size data
+;; 40 I fixed size data
  
 (define WHEEL-RADIUS 5)
 (define WHEEL-DISTANCE (* WHEEL-RADIUS 5))

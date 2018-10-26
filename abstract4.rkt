@@ -1,6 +1,8 @@
 #lang racket
 (require lang/htdp-advanced test-engine/racket-tests)
 
+;; intermezzo 3
+
 ; [list of x ] -> [list of [list n x]]
 ; pairs each item in lx w its index
 
@@ -62,9 +64,13 @@
 (define (sum-evens n)
   (for/sum ([i (in-range 0 n 2)]) i))
 
+
+;;; 305
+
 (define (convert-euro lod)
   (for/list ([i lod])
     (* i 0.9)))
+;;; 306
 
 (define (build-list1 n)
   (for/list ([i n])
@@ -105,6 +111,7 @@
 (check-expect (contains? (list 1 2) (list 2 3 1)) #t)
 (check-expect (contains? (list 1) (list 2 3 4)) #f)
 
+;;; 307
 (define (find-name name lon)
   (for/or ([i lon])
     (contains? (explode name) (explode i))))
@@ -189,6 +196,9 @@
 (check-expect (blue-eyed-child? Carl) #f)
 (check-expect (blue-eyed-child? Gustav) #t)
 
+
+;;; 310 IV intertwined data
+
 ; FT -> number
 ; count the number of child structures in the tree
 
@@ -209,10 +219,10 @@
     [else (+ (child-date an-ftree)
              (sum-age (child-father an-ftree))
              (sum-age (child-mother an-ftree)))]))
-
+;;; 311
 (define (average-age an-ftree)
   (/ (sum-age an-ftree) (count-persons an-ftree)))
-
+;;; 312
 (define (eye-colors an-ftree)
   (cond
     [(no-parent? an-ftree) '()]
@@ -225,7 +235,7 @@
 (check-expect (blue-eyed-child? Eva) #t)
 (check-expect (blue-eyed-ancestor? Eva) #f)
 (check-expect (blue-eyed-ancestor? Gustav) #t)
-
+;;; 313
 (define (blue-eyed-ancestor? an-ftree)
   (cond
     [(no-parent? an-ftree) #f]
@@ -250,6 +260,8 @@
 (check-expect (blue-eyed-child-in-forest? ff2) #t)
 (check-expect (blue-eyed-child-in-forest? ff3) #t)
 
+;;; 314
+
 (define (blue-eyed-child-in-forest? a-forest)
   (cond
     [(empty? a-forest) #f]
@@ -262,6 +274,7 @@
   (ormap blue-eyed-child? lof))
 (check-expect (blue-eyed-child-in-forest?2 ff1)
               (blue-eyed-child-in-forest? ff1))
+;;; 315
 
 (define (average-age2 ff)
   (/ (apply + (map sum-age ff))
@@ -283,6 +296,7 @@
 ; '(]
 ; (cons s-expr sl]
 
+;;; 316
 (define (atom? x)
   (or (number? x) (string? x) (symbol? x)))
 
@@ -318,7 +332,7 @@
     [(number? at) 0]
     [(string? at) 0]
     [(symbol? at) (if (symbol=? at sy) 1 0)]))
-
+;;; 317
 (define (count-se2 sexp sy)
   (local
     ((define (count-sl sl)
@@ -343,6 +357,8 @@
 (check-expect (count-se2 '(((world) hello) hello) 'hello)
               (count-se '(((world) hello) hello) 'hello))
 
+;; 318
+
 ;; depth
 ; sexp -> number
 (define (depth sexp)
@@ -357,7 +373,7 @@
 
 (define (depth* sexp)
   (add1 (depth sexp)))
-
+;;; 319
 ; substitute
 ; sexp symbol symbol -> sexp
 (define (substitute sexp sy1 sy2)
@@ -380,7 +396,7 @@
 
 ; '()
 ; (cons s-expr sl)
-
+;;; 320
 (define (count-se3 sexp)
   (cond
     [(atom? sexp) 1]
@@ -428,6 +444,7 @@
                                    (make-node 99 'i
                                               NONE NONE)))))
 
+;; 322
 ; number bt -> boolean
 (define (contains-bt? num bt)
   (cond
@@ -437,7 +454,7 @@
               (contains-bt? num (node-right bt)))]))
 (check-expect (contains-bt? 77 bt0) #t)
 (check-expect (contains-bt? 0 bt0) #f)
-
+;;; 323
 (define (search-bt num bt)
   (cond
     [(= num (node-ssn bt)) (node-name bt)]
@@ -449,6 +466,7 @@
 
 (check-expect (search-bt 89 bt0) 'f)
 (check-expect (search-bt 0 bt0) #f)
+;;; 324
 
 (define (inorder bt)
   (cond
@@ -459,7 +477,7 @@
       (list (node-ssn bt))
       (inorder (node-right bt)))]))
 
-
+;;; 325
 (define (search-bst num bt)
   (cond
     [(= num (node-ssn bt)) (node-name bt)]
@@ -473,7 +491,7 @@
 (check-expect (search-bst 0 bt0) #f)                       
 
 (define new-node (make-node 40 'j NONE NONE))
-
+;;; 326
 (define (create-bst bst n s)
   (cond
     [(no-info? bst) (make-node n s NONE NONE)]
@@ -489,7 +507,7 @@
                 (create-bst (node-right bst) n s))]))
 
 ; [list of [list number symbol]] -> bst
-
+;;; 327
 (define (create-bst-from-list lst)
   (foldr (lambda (nxt init)
            (create-bst init (first nxt) (second nxt)))
@@ -516,7 +534,7 @@
  
 (check-expect (substitute2 '(((world) bye) bye) 'bye '42)
               '(((world) 42) 42))
- 
+ ;; 328
 (define (substitute2 sexp old new)
   (cond
     [(atom? sexp) (if (equal? sexp old) new sexp)]
@@ -533,7 +551,7 @@
         (list "part1" "part2" "part3")
         (list (list "hang" "draw")
               (list "read"))))
-
+;; 331
 (define (how-many dt)
   (cond
     [(empty? dt) 0]
@@ -571,6 +589,9 @@
                                        1 "001"))
                             1 "110"))
             1 "011"))
+
+;;; 333
+
 (define (how-many2 dt)
   (cond
     [(string? dt) 1]
@@ -629,7 +650,7 @@
                                                     (make-file2 "text" 10 ""))))
                          (list (make-file2 "text" 10 ""))))
 
-
+;;; 336
 (define (how-many3 bt)
   (+
    (length (dir2-files bt))
@@ -648,6 +669,7 @@
     [else (list #f)]
     ))
 
+;;; 342 test w bt3
 (define (find2 n lod dname)
   (cond
     [(empty? lod) (list #f)]
@@ -676,7 +698,7 @@
 (define (not-false-end? lst)
   (not (false? (last lst))))
 
-
+;;; 343 test w bt3
 (define (ls-R lod dname)
   (cond
     [(empty? lod) '()]
@@ -705,6 +727,14 @@
     [else (append (first lol) (unlist (rest lol)))]))
 
 
+;; 344 
+(define (find-all name dtree)
+  (local
+    ((define lop (ls-h dtree)))
+    (filter (lambda (p) (equal? name (last p))) lop)))
+     
+
+
 
 (require htdp/dir)
 
@@ -712,7 +742,7 @@
 ; creates a representation of the a-path directory
 ;(define W (create-dir
 ;  "C:\\Users\\linhchi.nguyen\\Documents\\htdp\\"))
-
+;; 338
 (define W (create-dir
            "R:\\htdp\\"))
 
@@ -721,7 +751,7 @@
   (+
    (length (dir-files bt))
    (apply + (map how-many4 (dir-dirs bt)))))
-
+;; 339
 (define (find? n bt)
   (foldr (lambda (nxt init)
            (or (member? n (map file-name init))
@@ -731,12 +761,12 @@
 
 (check-expect (find? 'abstract.rkt W) #t)
 (check-expect (find? 'index W) #t)
-
+;; 340
 (define (ls bt)
   (append
    (map file-name (dir-files bt))
    (map dir-name (dir-dirs bt))))
-
+;; 341
 (define (du bt)
   (+ (all-files bt) (depth2 bt)))
 
