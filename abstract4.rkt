@@ -652,23 +652,25 @@
   (cond
     [(empty? lod) (list #f)]
     [else 
-     (empty->false
-      (filter not-false-end? 
-              (map (lambda (d) (cons dname (find-h n d))) lod)))]))
+     (first 
+      (empty->false
+       (filter not-false-end? 
+               (map (lambda (d) (cons dname (find-h n d))) lod))))]))
 
 (define (empty->false lst)
-  (if (empty? lst) (list #f) lst))
+  (if (empty? lst) (list (list #f)) lst))
 
 (define (find-h n d)
   (cond
     [(member? n (map file2-name (dir2-files d))) (list (dir2-name d) n)]
     [else (find2 n (dir2-dirs d) (dir2-name d))]))
 
-(define (find-h2 n d)
+; generalise find-h
+(define (find-h2 n d) 
   (local
     ((define res (find2 n (dir2-dirs d) (dir2-name d))))
     (if (member? n (map file2-name (dir2-files d))) 
-        (cons (list (dir2-name d) n) res)
+        (list (list (dir2-name d) n) res)
         res)))
 
 (define (not-false-end? lst)
@@ -679,12 +681,14 @@
   (cond
     [(empty? lod) '()]
     [else 
-     (local ((define res (map ls-h lod)))
-       (map (lambda (n) (add-names dname n)) res))]))
+     (local ((define res 
+               (map ls-h lod)))
+       (add-names dname (unlist res)))]))
+       ;(map (lambda (n) (add-names dname n)) (unlist res)))]))
 
 (define (ls-h dtree)
   (append
-   (map (lambda (n) (list (dir2-name dtree) n)) 
+   (map (lambda (n) (add-names (dir2-name dtree) n)) 
         (map file2-name (dir2-files dtree)))
    (ls-R (dir2-dirs dtree) (dir2-name dtree))))
 
@@ -692,10 +696,13 @@
   (cond
     [(string? s-or-los) (list dname s-or-los)]
     [(list? s-or-los)
-     (map (lambda (n) (list dname n)) s-or-los)]))
+     (map (lambda (n) (cons dname n)) s-or-los)]))
    
   
-                   
+(define (unlist lol)
+  (cond
+    [(empty? lol) '()]
+    [else (append (first lol) (unlist (rest lol)))]))
 
 
 
@@ -703,11 +710,11 @@
 
 ; string -> dir
 ; creates a representation of the a-path directory
-(define W (create-dir
-  "C:\\Users\\linhchi.nguyen\\Documents\\htdp\\"))
-
 ;(define W (create-dir
-;           "R:\\htdp\\"))
+;  "C:\\Users\\linhchi.nguyen\\Documents\\htdp\\"))
+
+(define W (create-dir
+           "R:\\htdp\\"))
 
 
 (define (how-many4 bt)
@@ -722,8 +729,8 @@
          (dir-files bt)
          (dir-dirs bt)))
 
-(check-expect (find? "abstract.rkt" W) #t)
-(check-expect (find? "index" W) #t)
+(check-expect (find? 'abstract.rkt W) #t)
+(check-expect (find? 'index W) #t)
 
 (define (ls bt)
   (append
