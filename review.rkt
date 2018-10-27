@@ -47,32 +47,37 @@
 
 
 ;;; exercise 342 
-(define (find n lod dname)
+; helper: to find the file-name in a list of subdirs
+; given file-name and the current dir-name
+; because we need to remember the dir path leading to that file-name
+; str list-of-str str -> list-of-str
+(define (find-helper fname lod dname)
   (cond
     [(empty? lod) (list #f)]
     [else 
      (first 
       (empty->false   ;; if all fails, it returns '() -> #f
        (filter not-false-end?   ;; filter out the dead ends
-               (map (lambda (d) (cons dname (find-h n d))) lod))))]))
+               (map (lambda (d) (cons dname (find fname d))) lod))))]))
 
 (define (empty->false lst)
   (if (empty? lst) (list (list #f)) lst))
 
-(define (find-h n d)    ;; started out as helper, becomes main function
+(define (find fname dtree)    ;; started out as helper, becomes main function
   (cond
-    [(member? n (map file2-name (dir-files d))) (list (dir-name d) n)]
-    [else (find n (dir-dirs d) (dir-name d))]))
+    [(member? fname 
+              (map file2-name (dir-files dtree))) (list (dir-name dtree) fname)]
+    [else (find-helper fname (dir-dirs dtree) (dir-name dtree))]))
 
-(check-expect (find-h "hang" DIR0) '("ts" "libs" "code" "hang"))
+(check-expect (find "hang" DIR0) '("ts" "libs" "code" "hang"))
 
 
 ; generalise find-h
-(define (find-all n d) 
+(define (find-all fname dtree) 
   (local
-    ((define res (find n (dir-dirs d) (dir-name d))))
-    (if (member? n (map file2-name (dir-files d))) 
-        (list (list (dir-name d) n) res)
+    ((define res (find-helper fname (dir-dirs dtree) (dir-name dtree))))
+    (if (member? fname (map file2-name (dir-files dtree))) 
+        (list (list (dir-name dtree) fname) res)
         res)))
 
 (define (not-false-end? lst)
@@ -83,22 +88,23 @@
 
 
 ;;; 343 
-(define (ls-R lod dname)
+;; list all paths to all files in a list of subdirs
+;; given the name of current dir
+(define (ls-h lod dname)
   (cond
     [(empty? lod) '()]
     [else 
      (local ((define res 
-               (map ls-h lod)))
+               (map ls-R lod)))
        (add-names dname (unlist res)))]))
-       ;(map (lambda (n) (add-names dname n)) (unlist res)))]))
-
-(define (ls-h dtree)    ;; started out as a helper
+      
+(define (ls-R dtree)    ;; started out as a helper
   (append               ;; becomes main function
    (map (lambda (n) (add-names (dir-name dtree) n)) 
         (map file2-name (dir-files dtree)))
-   (ls-R (dir-dirs dtree) (dir-name dtree))))
+   (ls-h (dir-dirs dtree) (dir-name dtree))))
 
-(check-expect (ls-h DIR0)
+(check-expect (ls-R DIR0)
               '(("ts" "read")
                 ("ts" "text" "part1")
                 ("ts" "text" "part2")
@@ -121,9 +127,10 @@
 
 
 ;; 344 
+;; define find-all using ls-R
 (define (find-all2 name dtree)
   (local
-    ((define lop (ls-h dtree)))
+    ((define lop (ls-R dtree)))
     (filter (lambda (p) (equal? name (last p))) lop)))
      
 

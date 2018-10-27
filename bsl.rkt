@@ -1,7 +1,15 @@
 #lang racket
 (require test-engine/racket-tests)
-; [number number] -> number
+
+; data definition:
+; bsl expression's representation is one of:
 ; number -> number
+; [number number] -> number
+
+; example:
+; bsl exp       representation     value
+; 3             3                  3
+; (+ 1 1}       (make-add 1 1)     2
 
 (define-struct add [left right] #:transparent)
 (define-struct mul [left right] #:transparent)
