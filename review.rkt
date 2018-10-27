@@ -9,7 +9,7 @@
 ; a file is a structure
 ; (make-file string n string)
 
-(define-struct dir2 [name dirs files])
+(define-struct dir [name dirs files])
 ; a dir2 is a structure
 ; (make-dir2 string dir* file*]
 
@@ -21,24 +21,24 @@
 ; '()
 ; (cons file file*)
 
-(define bt3
-  (make-dir2
+(define DIR0
+  (make-dir
    "ts" (list
-         (make-dir2
+         (make-dir
           "text" '()
           (list
            (make-file2 "part1" 99 "")
            (make-file2 "part2" 52 "")
            (make-file2 "part3" 17 "")))
-         (make-dir2
+         (make-dir
           "libs"
           (list
-           (make-dir2 "code"
+           (make-dir "code"
                       '()
                       (list
                        (make-file2 "hang" 8 "")
                        (make-file2 "draw" 2 "")))
-           (make-dir2 "docs"
+           (make-dir "docs"
                       '()
                       (list
                        (make-file2 "read" 19 ""))))
@@ -47,7 +47,7 @@
 
 
 ;;; exercise 342 
-(define (find2 n lod dname)
+(define (find n lod dname)
   (cond
     [(empty? lod) (list #f)]
     [else 
@@ -61,24 +61,24 @@
 
 (define (find-h n d)    ;; started out as helper, becomes main function
   (cond
-    [(member? n (map file2-name (dir2-files d))) (list (dir2-name d) n)]
-    [else (find2 n (dir2-dirs d) (dir2-name d))]))
+    [(member? n (map file2-name (dir-files d))) (list (dir-name d) n)]
+    [else (find n (dir-dirs d) (dir-name d))]))
 
-(check-expect (find-h "hang" bt3) '("ts" "libs" "code" "hang"))
+(check-expect (find-h "hang" DIR0) '("ts" "libs" "code" "hang"))
 
 
 ; generalise find-h
-(define (find-h2 n d) 
+(define (find-all n d) 
   (local
-    ((define res (find2 n (dir2-dirs d) (dir2-name d))))
-    (if (member? n (map file2-name (dir2-files d))) 
-        (list (list (dir2-name d) n) res)
+    ((define res (find n (dir-dirs d) (dir-name d))))
+    (if (member? n (map file2-name (dir-files d))) 
+        (list (list (dir-name d) n) res)
         res)))
 
 (define (not-false-end? lst)
   (not (false? (last lst))))
 
-(check-expect (find-h2 "read" bt3)
+(check-expect (find-all "read" DIR0)
               '(("ts" "read") ("ts" "libs" "docs" "read")))
 
 
@@ -94,11 +94,11 @@
 
 (define (ls-h dtree)    ;; started out as a helper
   (append               ;; becomes main function
-   (map (lambda (n) (add-names (dir2-name dtree) n)) 
-        (map file2-name (dir2-files dtree)))
-   (ls-R (dir2-dirs dtree) (dir2-name dtree))))
+   (map (lambda (n) (add-names (dir-name dtree) n)) 
+        (map file2-name (dir-files dtree)))
+   (ls-R (dir-dirs dtree) (dir-name dtree))))
 
-(check-expect (ls-h bt3)
+(check-expect (ls-h DIR0)
               '(("ts" "read")
                 ("ts" "text" "part1")
                 ("ts" "text" "part2")
@@ -121,7 +121,7 @@
 
 
 ;; 344 
-(define (find-all name dtree)
+(define (find-all2 name dtree)
   (local
     ((define lop (ls-h dtree)))
     (filter (lambda (p) (equal? name (last p))) lop)))
