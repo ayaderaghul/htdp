@@ -1,0 +1,42 @@
+#lang racket
+(require test-engine/racket-tests)
+
+(define-struct file2 [name size content])
+; a file is a structure
+; (make-file string n string)
+
+(define-struct dir2 [name dirs files])
+; a dir2 is a structure
+; (make-dir2 string dir* file*]
+
+; a dir* is one of
+; '()
+; (cons dir2 dir*)
+
+; a file* is one of
+; '()
+; (cons file file*)
+
+(define bt3
+  (make-dir2
+   "ts" (list
+         (make-dir2
+          "text" '()
+          (list
+           (make-file2 "part1" 99 "")
+           (make-file2 "part2" 52 "")
+           (make-file2 "part3" 17 "")))
+         (make-dir2
+          "libs"
+          (list
+           (make-dir2 "code"
+                      '()
+                      (list
+                       (make-file2 "hang" 8 "")
+                       (make-file2 "draw" 2 "")))
+           (make-dir2 "docs"
+                      '()
+                      (list
+                       (make-file2 "read" 19 ""))))
+          '()))
+   (list (make-file2 "read" 10 ""))))
