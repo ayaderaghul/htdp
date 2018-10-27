@@ -3,6 +3,8 @@
 ;; chapt IV intertwined data.
 ;; 20. iterative refinement
 
+;; https://htdp.org/2018-01-06/Book/part_four.html#%28part._sec~3arefine-funcs%29
+
 (define-struct file2 [name size content])
 ; a file is a structure
 ; (make-file string n string)
