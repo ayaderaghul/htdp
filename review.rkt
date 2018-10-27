@@ -60,8 +60,15 @@
        (filter not-false-end?   ;; filter out the dead ends
                (map (lambda (d) (cons dname (find fname d))) lod))))]))
 
+(check-expect (find-helper "hello" (dir-dirs DIR0) "ts") '(#f))
+(check-expect (find-helper "hang" (dir-dirs DIR0) "ts")
+              '("ts" "libs" "code" "hang"))
+
+ 
 (define (empty->false lst)
   (if (empty? lst) (list (list #f)) lst))
+(check-expect (empty->false '()) '((#f)))
+(check-expect (empty->false '(1)) '(1))
 
 (define (find fname dtree)    ;; started out as helper, becomes main function
   (cond
@@ -70,7 +77,7 @@
     [else (find-helper fname (dir-dirs dtree) (dir-name dtree))]))
 
 (check-expect (find "hang" DIR0) '("ts" "libs" "code" "hang"))
-
+(check-expect (find "hello" (make-dir "ts" '() '())) '(#f))
 
 ; generalise find-h
 (define (find-all fname dtree) 
@@ -82,6 +89,9 @@
 
 (define (not-false-end? lst)
   (not (false? (last lst))))
+(check-error (not-false-end? '()) )
+(check-expect (not-false-end? '(1)) #t)
+(check-expect (not-false-end? '(#f)) #f)
 
 (check-expect (find-all "read" DIR0)
               '(("ts" "read") ("ts" "libs" "docs" "read")))
@@ -119,12 +129,17 @@
     [(list? s-or-los)
      (map (lambda (n) (cons dname n)) s-or-los)]))
    
-  
+(check-expect (add-names "ts" "read") '("ts" "read"))
+(check-expect (add-names "ts" '(("p1") ("p2")))
+              '(("ts" "p1") ("ts" "p2")))
+
+
 (define (unlist lol)  ;; too many parentheses -> un-bracket one level
   (cond
     [(empty? lol) '()]
     [else (append (first lol) (unlist (rest lol)))]))
 
+(check-expect (unlist '(((1) (2)) ((3)))) '((1) (2) (3)))
 
 ;; 344 
 ;; define find-all using ls-R
